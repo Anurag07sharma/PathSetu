@@ -1,0 +1,18 @@
+PathSetu backend on http://localhost:8765  (WhatsApp dry-run)
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "text", "text": {"body": "నమస్కారం Yadagiri గారు, ఇది గోదావరి హాస్పిటల్ నుండి సందేశం. మీ ఛాతీ ఎక్స్-రేలో డాక్టర్ గారు సీటీ స్కాన్‌తో పరీక్షించాలనుకునే అంశం కనిపించింది. త్వరగా పరీక్ష చేయించుకోవడం ముఖ్యం."}}
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "text", "text": {"body": "సరైన సమయం బుక్ చేయడానికి 3 చిన్న ప్రశ్నలకు జవాబు ఇవ్వండి."}}
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "interactive", "interactive": {"type": "button", "body": {"text": "మీరు పొగ తాగుతారా లేదా పొగాకు నములుతారా?"}, "action": {"buttons": [{"type": "reply", "reply": {"id": "ans:PS-2706571:0:1", "title": "అవును"}}, {"type": "reply", "reply": {"id": "ans:PS-2706571:0:0", "title": "లేదు"}}]}}}
+127.0.0.1 - - [28/Oct/2026 18:38:26] "POST /api/flags HTTP/1.1" 201 -
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "interactive", "interactive": {"type": "button", "body": {"text": "మీకు షుగర్ (డయాబెటిస్) ఉందా?"}, "action": {"buttons": [{"type": "reply", "reply": {"id": "ans:PS-2706571:1:1", "title": "అవును"}}, {"type": "reply", "reply": {"id": "ans:PS-2706571:1:0", "title": "లేదు"}}]}}}
+127.0.0.1 - - [28/Oct/2026 18:38:26] "POST /webhook HTTP/1.1" 200 -
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "interactive", "interactive": {"type": "button", "body": {"text": "రెండు వారాలకు పైగా దగ్గు ఉందా?"}, "action": {"buttons": [{"type": "reply", "reply": {"id": "ans:PS-2706571:2:1", "title": "అవును"}}, {"type": "reply", "reply": {"id": "ans:PS-2706571:2:0", "title": "లేదు"}}]}}}
+127.0.0.1 - - [28/Oct/2026 18:38:26] "POST /webhook HTTP/1.1" 200 -
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "interactive", "interactive": {"type": "button", "body": {"text": "మీ కోసం సీటీ స్లాట్ ఉంచాము: గురువారం, ఉదయం 10:30, ₹2,975."}, "action": {"buttons": [{"type": "reply", "reply": {"id": "slot:PS-2706571:book", "title": "స్లాట్ బుక్ చేయండి"}}, {"type": "reply", "reply": {"id": "slot:PS-2706571:other", "title": "వేరే సమయం"}}, {"type": "reply", "reply": {"id": "slot:PS-2706571:call", "title": "నాకు కాల్ చేయండి"}}]}}}
+127.0.0.1 - - [28/Oct/2026 18:38:26] "POST /webhook HTTP/1.1" 200 -
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "text", "text": {"body": "బుక్ అయింది. మీ ఎక్స్-రే రిపోర్ట్ తీసుకురండి. ఒక రోజు ముందు గుర్తు చేస్తాము."}}
+127.0.0.1 - - [28/Oct/2026 18:38:26] "POST /webhook HTTP/1.1" 200 -
+127.0.0.1 - - [28/Oct/2026 18:38:26] "GET /api/worklist HTTP/1.1" 200 -
+[whatsapp dry-run] {"messaging_product": "whatsapp", "to": "91XXXXXXXXXX", "type": "text", "text": {"body": "వచ్చినందుకు ధన్యవాదాలు. మీ రిపోర్ట్ డాక్టర్ గారికి పంపించాము."}}
+127.0.0.1 - - [28/Oct/2026 18:38:26] "POST /api/patients/PS-2706571/complete HTTP/1.1" 200 -
+127.0.0.1 - - [28/Oct/2026 18:38:26] "GET /api/metrics HTTP/1.1" 200 -
+127.0.0.1 - - [28/Oct/2026 18:38:26] "GET /webhook?hub.mode=subscribe&hub.verify_token=pathsetu-demo&hub.challenge=42 HTTP/1.1" 200 -

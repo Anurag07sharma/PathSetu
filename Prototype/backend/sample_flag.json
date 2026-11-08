@@ -1,0 +1,11 @@
+{
+  "name": "Yadagiri Pasham",
+  "age": 59,
+  "sex": "M",
+  "phone": "91XXXXXXXXXX",
+  "lang": "te",
+  "finding": "Lung nodule, 7 mm",
+  "severity": 2,
+  "reader_confidence": 0.68,
+  "source": "AI reader (any vendor)"
+}

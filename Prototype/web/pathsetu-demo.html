@@ -1,0 +1,429 @@
+<title>PathSetu Follow-up Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,400;9..40,500;9..40,600;9..40,700&family=IBM+Plex+Mono:wght@400;500&family=Noto+Sans+Telugu:wght@400;600&family=Noto+Sans+Devanagari:wght@400;600&display=swap">
+<style>
+/* Layout: hospital ops desk — KPI strip, worklist on the left, patient panel (priority engine + WhatsApp phone) on the right */
+:root {
+  --bg: #F2F5F7; --panel: #FFFFFF; --ink: #0F1F33; --muted: #566579; --line: #DCE3E9;
+  --brand: #0B7F7B; --brand-soft: #DDF1EF; --coral: #D9573F;
+  --p1: #C2382A; --p1-soft: #FBE3DF; --p2: #B86E00; --p2-soft: #FCEFD9; --p3: #2F6E4F; --p3-soft: #E1F1E8;
+  --wa-bg: #ECE5DD; --wa-in: #FFFFFF; --wa-out: #D9FDD3; --wa-head: #0B5F59;
+  --display: "DM Sans", "Segoe UI", Arial, sans-serif;
+  --mono: "IBM Plex Mono", ui-monospace, Menlo, monospace;
+  --indic: "Noto Sans Telugu", "Noto Sans Devanagari", "DM Sans", sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0D1724; --panel: #142233; --ink: #E8EEF3; --muted: #9AABBD; --line: #24364B;
+  --brand: #3CC0B8; --brand-soft: #123A3E; --coral: #F07A62;
+  --p1: #FF8A7A; --p1-soft: #3D1E1C; --p2: #F2B24C; --p2-soft: #3A2C12; --p3: #6FD19D; --p3-soft: #173226;
+  --wa-bg: #0B141A; --wa-in: #202C33; --wa-out: #005C4B; --wa-head: #1F2C33; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0D1724; --panel: #142233; --ink: #E8EEF3; --muted: #9AABBD; --line: #24364B;
+  --brand: #3CC0B8; --brand-soft: #123A3E; --coral: #F07A62;
+  --p1: #FF8A7A; --p1-soft: #3D1E1C; --p2: #F2B24C; --p2-soft: #3A2C12; --p3: #6FD19D; --p3-soft: #173226;
+  --wa-bg: #0B141A; --wa-in: #202C33; --wa-out: #005C4B; --wa-head: #1F2C33; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font: 15px/1.45 var(--display); padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 16px 40px }
+.wrap { max-width: 1320px; margin: 0 auto; display: flex; flex-direction: column; gap: 16px }
+header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; justify-content: space-between }
+.brand { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap }
+.logo { font-weight: 700; font-size: 22px; letter-spacing: -0.3px }
+.logo span { color: var(--brand) }
+.site { color: var(--muted) }
+.demo-tag { font: 500 12px var(--mono); color: var(--coral); border: 1px solid var(--coral); border-radius: 4px; padding: 2px 8px }
+button { font: inherit; cursor: pointer; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink); padding: 8px 14px }
+button:hover { border-color: var(--brand) }
+button:focus-visible, select:focus-visible { outline: 3px solid var(--brand); outline-offset: 2px }
+button.primary { background: var(--brand); border-color: var(--brand); color: #fff; font-weight: 600 }
+:root[data-theme="dark"] button.primary { color: #06201F }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) button.primary { color: #06201F } }
+button:disabled { opacity: .45; cursor: not-allowed }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px }
+.kpi { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; display: flex; flex-direction: column; gap: 2px }
+.kpi b { font-size: 26px; font-variant-numeric: tabular-nums; letter-spacing: -0.5px }
+.kpi small { color: var(--muted) }
+.kpi .note { font-size: 13px; color: var(--muted) }
+.kpi .up { color: var(--p3); font-weight: 600 }
+.main { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); gap: 16px; align-items: start }
+.card { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; min-width: 0 }
+.card h2 { font-size: 16px; margin: 0; display: flex; justify-content: space-between; align-items: center; gap: 8px; flex-wrap: wrap }
+.card h2 small { font-weight: 400; color: var(--muted); font-size: 13px }
+.tablewrap { overflow-x: auto }
+table { width: 100%; border-collapse: collapse; font-size: 14px }
+th { text-align: left; font-weight: 600; color: var(--muted); font-size: 12px; letter-spacing: .3px; padding: 6px 8px; border-bottom: 1px solid var(--line); white-space: nowrap }
+td { padding: 10px 8px; border-bottom: 1px solid var(--line); vertical-align: middle }
+tr.row { cursor: pointer }
+tr.row:hover td { background: color-mix(in srgb, var(--brand-soft) 50%, transparent) }
+tr.row.sel td { background: var(--brand-soft) }
+tr.row:focus-visible { outline: 2px solid var(--brand) }
+.pname { font-weight: 600 }
+.sub { color: var(--muted); font-size: 12.5px }
+.id { font: 12px var(--mono); color: var(--muted) }
+.chip { display: inline-flex; align-items: center; gap: 6px; font-weight: 600; font-size: 12.5px; border-radius: 999px; padding: 3px 10px; white-space: nowrap }
+.chip::before { content: ""; width: 7px; height: 7px; border-radius: 50% }
+.P1 { background: var(--p1-soft); color: var(--p1) } .P1::before { background: var(--p1) }
+.P2 { background: var(--p2-soft); color: var(--p2) } .P2::before { background: var(--p2) }
+.P3 { background: var(--p3-soft); color: var(--p3) } .P3::before { background: var(--p3) }
+.steps { display: flex; gap: 3px }
+.steps i { width: 18px; height: 6px; border-radius: 3px; background: var(--line) }
+.steps i.on { background: var(--brand) }
+.stat { font-size: 12.5px; color: var(--muted); white-space: nowrap }
+.second { font: 500 11px var(--mono); color: var(--coral); display: block; margin-top: 3px }
+.side { display: flex; flex-direction: column; gap: 16px; min-width: 0 }
+.engine ol { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 8px }
+.engine li { display: grid; grid-template-columns: 26px minmax(0, 1fr); gap: 10px; align-items: start }
+.engine li .n { width: 26px; height: 26px; border-radius: 50%; border: 1.5px solid var(--brand); color: var(--brand); display: grid; place-items: center; font: 600 12px var(--mono) }
+.engine li.skip { opacity: .45 }
+.engine li p { margin: 0 }
+.engine li p small { color: var(--muted); display: block }
+.votes { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 4px }
+.vote { font: 12px var(--mono); border: 1px solid var(--line); border-radius: 6px; padding: 2px 8px }
+.vote.hi { border-color: var(--p1); color: var(--p1) }
+.verdict { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 12px; border-radius: 10px; background: var(--bg) }
+.verdict .act { font-weight: 600 }
+.panelhead { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wrap; align-items: start }
+.panelhead .facts { display: flex; flex-wrap: wrap; gap: 4px 14px; font-size: 13px; color: var(--muted) }
+.phone-row { display: grid; grid-template-columns: minmax(0, 300px) minmax(0, 1fr); gap: 16px; align-items: start }
+.phone { border: 8px solid var(--ink); border-radius: 28px; overflow: hidden; background: var(--wa-bg); display: flex; flex-direction: column; height: 520px; max-width: 100% }
+.wa-head { background: var(--wa-head); color: #fff; padding: 10px 12px; display: flex; gap: 10px; align-items: center }
+.wa-head .av { width: 32px; height: 32px; border-radius: 50%; background: #ffffff33; display: grid; place-items: center; font-weight: 700; font-size: 13px }
+.wa-head b { display: block; font-size: 14px } .wa-head small { opacity: .8; font-size: 11.5px }
+.chat { flex: 1; overflow-y: auto; padding: 10px; display: flex; flex-direction: column; gap: 6px }
+.msg { max-width: 86%; padding: 7px 9px 5px; border-radius: 8px; font: 13.5px/1.4 var(--indic); color: var(--ink); box-shadow: 0 1px 0 #0000001a; white-space: pre-line }
+.msg.in { background: var(--wa-in); align-self: flex-start; border-top-left-radius: 2px }
+.msg.out { background: var(--wa-out); align-self: flex-end; border-top-right-radius: 2px }
+.msg time { display: block; text-align: right; font: 10.5px var(--mono); color: var(--muted); margin-top: 2px }
+.qr { display: flex; flex-direction: column; gap: 4px; align-self: flex-start; width: 86% }
+.qr button { background: var(--wa-in); border: 0; color: #0A84C7; font: 600 13px var(--indic); padding: 7px; border-radius: 8px }
+.qr button:disabled { color: var(--muted) }
+.empty-chat { margin: auto; text-align: center; color: var(--muted); font-size: 13px; padding: 20px }
+.controls { display: flex; flex-direction: column; gap: 10px }
+.controls label { font-size: 13px; color: var(--muted); display: flex; flex-direction: column; gap: 4px }
+select { font: inherit; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--line); background: var(--panel); color: var(--ink) }
+.log { font: 12px/1.5 var(--mono); color: var(--muted); border-top: 1px solid var(--line); padding-top: 8px; display: flex; flex-direction: column; gap: 2px; max-height: 150px; overflow-y: auto }
+.funnel { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px }
+.fstep { display: flex; flex-direction: column; gap: 6px }
+.fstep .bar { height: 10px; border-radius: 5px; background: var(--line); position: relative; overflow: hidden }
+.fstep .bar span { position: absolute; inset: 0 auto 0 0; background: var(--brand); border-radius: 5px }
+.fstep b { font-variant-numeric: tabular-nums; font-size: 18px }
+.fstep small { color: var(--muted) }
+.foot { color: var(--muted); font-size: 12.5px }
+.toast { position: fixed; right: max(16px, env(safe-area-inset-right, 0px)); bottom: calc(16px + env(safe-area-inset-bottom, 0px)); background: var(--ink); color: var(--bg); padding: 10px 14px; border-radius: 8px; font-size: 14px; opacity: 0; transform: translateY(8px); transition: .2s; pointer-events: none }
+.toast.show { opacity: 1; transform: none }
+@media (max-width: 1000px) { .main { grid-template-columns: minmax(0, 1fr) } }
+@media (max-width: 640px) { .kpis, .funnel { grid-template-columns: repeat(2, minmax(0, 1fr)) } .phone-row { grid-template-columns: minmax(0, 1fr) } .phone { height: 460px } }
+@media (prefers-reduced-motion: reduce) { .toast { transition: none } }
+</style>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">Path<span>Setu</span></div>
+      <div class="site">Follow-up desk · Godavari Demo Hospital, Hanamkonda</div>
+      <span class="demo-tag">Demo data, fictional patients</span>
+    </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap">
+      <button id="btn-newflag" class="primary">Receive new AI flag</button>
+      <button id="btn-reset">Reset demo</button>
+    </div>
+  </header>
+
+  <section class="kpis" aria-label="This month">
+    <div class="kpi"><small>Scans flagged by AI reader</small><b id="k-flagged">0</b><span class="note">this month, chest X-ray and CT</span></div>
+    <div class="kpi"><small>Follow-ups completed</small><b id="k-done">0</b><span class="note" id="k-done-note"></span></div>
+    <div class="kpi"><small>Completion rate</small><b id="k-rate">0%</b><span class="note">month to date · target 70% (typical today ~40%)</span></div>
+    <div class="kpi"><small>Revenue recovered</small><b id="k-rev">₹0</b><span class="note">CT ₹2,975 + consult ₹500 per return</span></div>
+  </section>
+
+  <div class="main">
+    <section class="card" aria-labelledby="wl-h">
+      <h2 id="wl-h">Worklist <small>sorted by priority, then wait time</small></h2>
+      <div class="tablewrap">
+        <table>
+          <thead><tr><th>Patient</th><th>Finding (AI reader)</th><th>Priority</th><th>Progress</th><th>Next action</th></tr></thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div>
+        <h2 style="margin-bottom:10px">Flag to follow-up funnel <small id="funnel-note"></small></h2>
+        <div class="funnel" id="funnel"></div>
+      </div>
+    </section>
+
+    <div class="side">
+      <section class="card engine" aria-labelledby="pe-h">
+        <div class="panelhead">
+          <div>
+            <h2 id="pe-h"><span id="p-name">Patient</span></h2>
+            <div class="facts" id="p-facts"></div>
+          </div>
+          <span class="chip" id="p-chip"></span>
+        </div>
+        <ol id="engine-steps"></ol>
+        <div class="verdict" id="verdict"></div>
+      </section>
+
+      <section class="card" aria-labelledby="wa-h">
+        <h2 id="wa-h">Patient's WhatsApp <small>what the patient sees</small></h2>
+        <div class="phone-row">
+          <div class="phone" role="log" aria-label="WhatsApp conversation">
+            <div class="wa-head"><div class="av">GD</div><div><b>Godavari Hospital</b><small>Verified business · replies with PathSetu</small></div></div>
+            <div class="chat" id="chat"></div>
+          </div>
+          <div class="controls">
+            <label for="lang">Message language
+              <select id="lang"><option value="te">Telugu</option><option value="hi">Hindi</option><option value="en">English</option></select>
+            </label>
+            <button id="btn-send" class="primary">Send first message</button>
+            <button id="btn-done">Mark scan as done</button>
+            <div class="log" id="log" aria-live="polite"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+  <p class="foot">The priority engine adapts the confidence-cascade logic from our Q-Triage project; the patient-risk numbers here are illustrative, not a validated clinical model. PathSetu never diagnoses: it schedules and tracks the follow-up a doctor has asked for.</p>
+</div>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+const PRICE_CT = 2975, PRICE_CONSULT = 500;
+const STAGES = ["Flagged", "Messaged", "Answered", "Booked", "Completed"];
+
+const SEED = [
+  { id: "GDH-24817", name: "Ramesh Goud", age: 56, sex: "M", town: "Karimnagar", finding: "Lung nodule, 9 mm", sev: 3, conf: 0.94, stage: 0, hours: 6, ans: null },
+  { id: "GDH-24809", name: "Lakshmi Devi", age: 47, sex: "F", town: "Jangaon", finding: "Possible TB, upper zone", sev: 2, conf: 0.71, stage: 2, hours: 30, ans: { smoke: false, sugar: true, cough: true } },
+  { id: "GDH-24791", name: "Mohammed Arif", age: 62, sex: "M", town: "Hanamkonda", finding: "Lung nodule, 6 mm", sev: 2, conf: 0.82, stage: 1, hours: 50, ans: null },
+  { id: "GDH-24788", name: "Sunitha Reddy", age: 39, sex: "F", town: "Warangal", finding: "Pleural effusion, small", sev: 2, conf: 0.91, stage: 3, hours: 72, ans: { smoke: false, sugar: false, cough: false } },
+  { id: "GDH-24760", name: "Venkatesh Rao", age: 68, sex: "M", town: "Mahabubabad", finding: "Mass, right hilum", sev: 3, conf: 0.97, stage: 4, hours: 140, ans: { smoke: true, sugar: true, cough: true } },
+  { id: "GDH-24755", name: "Anitha Kumari", age: 44, sex: "F", town: "Hanamkonda", finding: "Enlarged heart shadow", sev: 1, conf: 0.88, stage: 4, hours: 160, ans: { smoke: false, sugar: true, cough: false } },
+  { id: "GDH-24742", name: "Srinivas Yadav", age: 51, sex: "M", town: "Bhupalpally", finding: "Possible TB, cavity", sev: 3, conf: 0.93, stage: 4, hours: 190, ans: { smoke: true, sugar: false, cough: true } },
+  { id: "GDH-24733", name: "Padma Naik", age: 58, sex: "F", town: "Narsampet", finding: "Lung nodule, 5 mm", sev: 1, conf: 0.79, stage: 1, hours: 210, ans: null },
+  { id: "GDH-24720", name: "Kiran Kumar", age: 35, sex: "M", town: "Warangal", finding: "Rib fracture, healing", sev: 1, conf: 0.95, stage: 4, hours: 260, ans: { smoke: false, sugar: false, cough: false } },
+  { id: "GDH-24711", name: "Saroja Bai", age: 64, sex: "F", town: "Parkal", finding: "Lung nodule, 8 mm", sev: 2, conf: 0.86, stage: 0, hours: 300, ans: null },
+];
+const NEW_FLAGS = [
+  { name: "Yadagiri Pasham", age: 59, sex: "M", town: "Station Ghanpur", finding: "Lung nodule, 7 mm", sev: 2, conf: 0.68 },
+  { name: "Fatima Begum", age: 33, sex: "F", town: "Hanamkonda", finding: "Possible TB, lower zone", sev: 2, conf: 0.84 },
+  { name: "Raju Banoth", age: 71, sex: "M", town: "Thorrur", finding: "Mass, left upper lobe", sev: 3, conf: 0.92 },
+];
+
+/* ---------- Priority engine: Q-Triage confidence cascade, re-pointed at follow-up urgency ---------- */
+function patientRisk(p) {
+  const a = p.ans || { smoke: false, sugar: false, cough: false };
+  const z = -3 + 0.045 * (p.age - 40) + 1.0 * a.smoke + 0.6 * a.sugar + 1.2 * a.cough;
+  return 1 / (1 + Math.exp(-z));
+}
+function priority(p) {
+  const a = p.ans || { smoke: false, sugar: false, cough: false };
+  const steps = [];
+  if (p.conf >= 0.90) {
+    const tier = p.sev === 3 ? "P1" : p.sev === 2 ? "P2" : "P3";
+    steps.push({ t: "Reader is confident", d: `AI reader confidence ${(p.conf * 100).toFixed(0)}% is at or above 90%, so we trust the flag and set urgency from the finding.`, on: true });
+    steps.push({ t: "Risk committee", d: "Skipped: not needed when the reader is confident.", on: false });
+    return { tier, second: false, steps, risk: patientRisk(p) };
+  }
+  const risk = patientRisk(p);
+  const votes = { "Risk model": risk >= 0.5, "Age + smoking": p.age >= 50 && a.smoke, "Symptoms": a.cough || (a.sugar && p.finding.includes("TB")) };
+  const hi = Object.values(votes).filter(Boolean).length;
+  steps.push({ t: "Reader is unsure", d: `AI reader confidence ${(p.conf * 100).toFixed(0)}% is below 90%, so three patient-risk checks vote.`, on: true });
+  steps.push({ t: "Risk committee", d: p.ans ? `${hi} of 3 checks say high risk.` : "Waiting for the patient's WhatsApp answers; counting them as low risk for now.", votes, on: true });
+  let tier = hi === 3 ? "P1" : hi === 2 ? "P2" : hi === 1 ? (p.sev >= 2 ? "P2" : "P3") : (p.sev === 3 ? "P2" : "P3");
+  const second = hi >= 2 && p.conf < 0.8;
+  return { tier, second, steps, risk };
+}
+const ACTION = {
+  P1: { label: "Urgent", act: "Navigator calls within 24 h and books the slot", days: "24 h" },
+  P2: { label: "High", act: "WhatsApp + voice call, book within 7 days", days: "7 days" },
+  P3: { label: "Routine", act: "WhatsApp reminders, book within 30 days", days: "30 days" },
+};
+
+/* ---------- Messages ---------- */
+const T = {
+  en: {
+    hello: (p) => `Namaste ${p.name.split(" ")[0]} garu, this is Godavari Hospital.\nYour chest X-ray shows something the doctor wants to check with a CT scan. Checking early is important.`,
+    ask: "Please answer 3 quick questions so we can book the right slot.",
+    q: ["Do you smoke or chew tobacco?", "Do you have diabetes (sugar)?", "Have you had a cough for more than 2 weeks?"],
+    yes: "Yes", no: "No",
+    slot: "We have kept a CT slot for you:\nThursday, 10:30 AM · ₹2,975",
+    book: "Book this slot", other: "Choose another time", call: "Call me",
+    booked: "Booked ✅ Please bring your X-ray report. We will remind you a day before.",
+    callback: "Our care team will call you within 24 hours.",
+    done: "Thank you for coming. Your report has been sent to your doctor.",
+  },
+  hi: {
+    hello: (p) => `नमस्ते ${p.name.split(" ")[0]} जी, यह गोदावरी हॉस्पिटल से संदेश है।\nआपके छाती के एक्स-रे में कुछ दिखा है जिसे डॉक्टर सीटी स्कैन से जाँचना चाहते हैं। जल्दी जाँच कराना ज़रूरी है।`,
+    ask: "सही समय बुक करने के लिए 3 छोटे सवालों के जवाब दीजिए।",
+    q: ["क्या आप धूम्रपान करते हैं या तंबाकू खाते हैं?", "क्या आपको डायबिटीज़ (शुगर) है?", "क्या आपको 2 हफ़्ते से ज़्यादा से खाँसी है?"],
+    yes: "हाँ", no: "नहीं",
+    slot: "आपके लिए सीटी स्लॉट रखा है:\nगुरुवार, सुबह 10:30 · ₹2,975",
+    book: "यह स्लॉट बुक करें", other: "दूसरा समय चुनें", call: "मुझे कॉल करें",
+    booked: "बुक हो गया ✅ अपनी एक्स-रे रिपोर्ट साथ लाएँ। एक दिन पहले याद दिलाएँगे।",
+    callback: "हमारी केयर टीम 24 घंटे में आपको कॉल करेगी।",
+    done: "आने के लिए धन्यवाद। आपकी रिपोर्ट डॉक्टर को भेज दी गई है।",
+  },
+  te: {
+    hello: (p) => `నమస్కారం ${p.name.split(" ")[0]} గారు, ఇది గోదావరి హాస్పిటల్ నుండి సందేశం.\nమీ ఛాతీ ఎక్స్-రేలో డాక్టర్ గారు సీటీ స్కాన్‌తో పరీక్షించాలనుకునే అంశం కనిపించింది. త్వరగా పరీక్ష చేయించుకోవడం ముఖ్యం.`,
+    ask: "సరైన సమయం బుక్ చేయడానికి 3 చిన్న ప్రశ్నలకు జవాబు ఇవ్వండి.",
+    q: ["మీరు పొగ తాగుతారా లేదా పొగాకు నములుతారా?", "మీకు షుగర్ (డయాబెటిస్) ఉందా?", "రెండు వారాలకు పైగా దగ్గు ఉందా?"],
+    yes: "అవును", no: "లేదు",
+    slot: "మీ కోసం సీటీ స్లాట్ ఉంచాము:\nగురువారం, ఉదయం 10:30 · ₹2,975",
+    book: "ఈ స్లాట్ బుక్ చేయండి", other: "వేరే సమయం ఎంచుకోండి", call: "నాకు కాల్ చేయండి",
+    booked: "బుక్ అయింది ✅ మీ ఎక్స్-రే రిపోర్ట్ తీసుకురండి. ఒక రోజు ముందు గుర్తు చేస్తాము.",
+    callback: "మా కేర్ టీమ్ 24 గంటల్లో మీకు కాల్ చేస్తుంది.",
+    done: "వచ్చినందుకు ధన్యవాదాలు. మీ రిపోర్ట్ డాక్టర్ గారికి పంపించాము.",
+  },
+};
+
+/* ---------- State ---------- */
+let patients, selectedId, chats, logs, newIdx, idSeq;
+function reset() {
+  patients = SEED.map((p) => ({ ...p, ans: p.ans ? { ...p.ans } : null }));
+  chats = {}; logs = {}; newIdx = 0; idSeq = 24818;
+  selectedId = "GDH-24817";
+  render();
+}
+const $ = (id) => document.getElementById(id);
+const sel = () => patients.find((p) => p.id === selectedId);
+const rank = { P1: 0, P2: 1, P3: 2 };
+const fmtINR = (n) => "₹" + n.toLocaleString("en-IN");
+const hrs = (h) => (h < 48 ? `${h} h ago` : `${Math.round(h / 24)} days ago`);
+function now() { const d = new Date(); return d.toTimeString().slice(0, 5); }
+function toast(t) { const el = $("toast"); el.textContent = t; el.classList.add("show"); clearTimeout(toast.t); toast.t = setTimeout(() => el.classList.remove("show"), 2200); }
+function log(p, t) { (logs[p.id] ||= []).unshift(`${now()}  ${t}`); }
+
+function nextAction(p, pr) {
+  if (p.stage === 4) return "Closed: report sent to doctor";
+  if (p.stage === 3) return "Confirm arrival on scan day";
+  if (p.stage === 2 && pr.tier === "P1") return "Navigator call due";
+  if (p.stage === 0) return "Send WhatsApp";
+  if (p.stage === 1) return "Waiting for reply · auto-reminder in 24 h";
+  return "Offer CT slot";
+}
+
+/* ---------- Render ---------- */
+function render() {
+  const list = patients.map((p) => ({ p, pr: priority(p) }))
+    .sort((a, b) => (a.p.stage === 4) - (b.p.stage === 4) || rank[a.pr.tier] - rank[b.pr.tier] || b.p.hours - a.p.hours);
+  $("rows").innerHTML = list.map(({ p, pr }) => `
+    <tr class="row ${p.id === selectedId ? "sel" : ""}" data-id="${p.id}" tabindex="0">
+      <td><div class="pname">${p.name}</div><div class="sub">${p.age}${p.sex} · ${p.town} · <span class="id">${p.id}</span></div></td>
+      <td>${p.finding}<div class="sub">reader confidence ${(p.conf * 100).toFixed(0)}% · ${hrs(p.hours)}</div></td>
+      <td><span class="chip ${pr.tier}">${pr.tier} ${ACTION[pr.tier].label}</span>${pr.second ? '<span class="second">Second look</span>' : ""}</td>
+      <td><div class="steps" aria-label="${STAGES[p.stage]}">${STAGES.slice(1).map((s, i) => `<i class="${p.stage > i ? "on" : ""}" title="${s}"></i>`).join("")}</div><div class="stat">${STAGES[p.stage]}</div></td>
+      <td class="sub">${nextAction(p, pr)}</td>
+    </tr>`).join("");
+  document.querySelectorAll("tr.row").forEach((tr) => {
+    const pick = () => { selectedId = tr.dataset.id; render(); };
+    tr.addEventListener("click", pick);
+    tr.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); pick(); } });
+  });
+
+  const flagged = patients.length, done = patients.filter((p) => p.stage === 4).length;
+  $("k-flagged").textContent = flagged;
+  $("k-done").textContent = done;
+  const rate = Math.round((done / flagged) * 100);
+  $("k-rate").innerHTML = `${rate}%`;
+  $("k-done-note").textContent = `${patients.filter((p) => p.stage === 3).length} more booked`;
+  $("k-rev").textContent = fmtINR(done * (PRICE_CT + PRICE_CONSULT));
+
+  const counts = [flagged, patients.filter((p) => p.stage >= 1).length, patients.filter((p) => p.stage >= 3).length, done];
+  const names = ["Flagged", "Contacted", "Booked", "Completed"];
+  $("funnel").innerHTML = counts.map((c, i) => `<div class="fstep"><small>${names[i]}</small><b>${c}</b><div class="bar"><span style="width:${(c / flagged) * 100}%"></span></div></div>`).join("");
+  $("funnel-note").textContent = `${rate}% complete so far this month`;
+
+  renderPatient();
+}
+
+function renderPatient() {
+  const p = sel(); if (!p) return;
+  const pr = priority(p);
+  $("p-name").textContent = p.name;
+  $("p-facts").innerHTML = `<span>${p.age} yrs, ${p.sex === "M" ? "male" : "female"}</span><span>${p.town}</span><span>${p.finding}</span>`;
+  const chip = $("p-chip"); chip.className = `chip ${pr.tier}`; chip.textContent = `${pr.tier} ${ACTION[pr.tier].label}`;
+  $("engine-steps").innerHTML = pr.steps.map((s, i) => `
+    <li class="${s.on ? "" : "skip"}"><span class="n">${i + 1}</span><p>${s.t}<small>${s.d}</small>
+    ${s.votes ? `<span class="votes">${Object.entries(s.votes).map(([k, v]) => `<span class="vote ${v ? "hi" : ""}">${k}: ${v ? "high" : "low"}</span>`).join("")}</span>` : ""}</p></li>`).join("")
+    + `<li><span class="n">${pr.steps.length + 1}</span><p>Follow-up tier<small>Patient risk score ${(pr.risk * 100).toFixed(0)}%. ${pr.second ? "The reader was unsure but the patient's risk is high, so a radiologist takes a second look." : "Tier sets how hard and how fast we chase this follow-up."}</small></p></li>`;
+  $("verdict").innerHTML = `<span class="chip ${pr.tier}">${pr.tier}</span><span class="act">${ACTION[pr.tier].act}</span>`;
+  renderChat(p);
+  $("btn-send").disabled = p.stage !== 0;
+  $("btn-done").disabled = p.stage !== 3;
+  $("log").innerHTML = (logs[p.id] || ["No activity yet in this session."]).map((l) => `<div>${l}</div>`).join("");
+}
+
+function renderChat(p) {
+  const c = chats[p.id];
+  const box = $("chat");
+  if (!c) {
+    box.innerHTML = `<div class="empty-chat">${p.stage === 0 ? "No message sent yet.<br>Press “Send first message”." : "Earlier messages for this demo patient aren't shown. Pick Ramesh, Saroja or a new flag to run the full chat."}</div>`;
+    return;
+  }
+  const L = T[c.lang];
+  box.innerHTML = c.items.map((m) => `<div class="msg ${m.who}">${m.text}<time>${m.time}</time></div>`).join("");
+  if (c.q < 3 && c.waiting) {
+    box.insertAdjacentHTML("beforeend", `<div class="qr"><button data-a="1">${L.yes}</button><button data-a="0">${L.no}</button></div>`);
+    box.querySelectorAll(".qr button").forEach((b) => b.addEventListener("click", () => answer(p, b.dataset.a === "1")));
+  } else if (c.q === 3 && p.stage === 2) {
+    box.insertAdjacentHTML("beforeend", `<div class="qr"><button data-k="book">${L.book}</button><button data-k="other">${L.other}</button><button data-k="call">${L.call}</button></div>`);
+    box.querySelectorAll(".qr button").forEach((b) => b.addEventListener("click", () => slot(p, b.dataset.k)));
+  }
+  box.scrollTop = box.scrollHeight;
+}
+
+/* ---------- Actions ---------- */
+function say(p, who, text) { chats[p.id].items.push({ who, text, time: now() }); }
+function send() {
+  const p = sel(); if (!p || p.stage !== 0) return;
+  const lang = $("lang").value, L = T[lang];
+  chats[p.id] = { lang, items: [], q: 0, waiting: true };
+  say(p, "in", L.hello(p)); say(p, "in", L.ask); say(p, "in", L.q[0]);
+  p.stage = 1; p.ans = { smoke: false, sugar: false, cough: false }; p._answered = 0;
+  log(p, `WhatsApp sent in ${$("lang").selectedOptions[0].text}`);
+  render(); toast("WhatsApp sent");
+}
+function answer(p, yes) {
+  const c = chats[p.id], L = T[c.lang];
+  const before = priority(p).tier;
+  say(p, "out", yes ? L.yes : L.no);
+  p.ans[["smoke", "sugar", "cough"][c.q]] = yes;
+  c.q += 1;
+  if (c.q < 3) { say(p, "in", L.q[c.q]); }
+  else {
+    p.stage = 2; c.waiting = false;
+    const after = priority(p).tier;
+    log(p, `Answers in. Priority ${before} → ${after}`);
+    if (after === "P1") log(p, "Navigator task created: call within 24 h");
+    say(p, "in", L.slot);
+    if (after !== before) toast(`Priority changed: ${before} → ${after}`);
+  }
+  render();
+}
+function slot(p, k) {
+  const c = chats[p.id], L = T[c.lang];
+  if (k === "book") { say(p, "out", L.book); say(p, "in", L.booked); p.stage = 3; log(p, "CT booked: Thu 10:30"); toast("Slot booked"); }
+  else if (k === "call") { say(p, "out", L.call); say(p, "in", L.callback); log(p, "Call-back requested, assigned to navigator"); toast("Call-back assigned"); }
+  else { say(p, "out", L.other); say(p, "in", L.slot.replace("10:30", "4:15").replace("గురువారం", "శుక్రవారం").replace("गुरुवार", "शुक्रवार").replace("Thursday", "Friday").replace("सुबह", "शाम").replace("ఉదయం", "సాయంత్రం").replace("AM", "PM")); log(p, "Patient asked for another slot"); }
+  render();
+}
+function done() {
+  const p = sel(); if (!p || p.stage !== 3) return;
+  p.stage = 4; log(p, `Scan done. ${fmtINR(PRICE_CT + PRICE_CONSULT)} recovered; outcome fee logged`);
+  if (chats[p.id]) say(p, "in", T[chats[p.id].lang].done);
+  render(); toast("Follow-up completed");
+}
+function newFlag() {
+  const base = NEW_FLAGS[newIdx % NEW_FLAGS.length]; newIdx++;
+  const p = { ...base, id: `GDH-${idSeq++}`, stage: 0, hours: 0, ans: null };
+  patients.unshift(p); selectedId = p.id;
+  log(p, `Flag received from AI reader (${p.finding}, ${(p.conf * 100).toFixed(0)}%)`);
+  render(); toast(`New flag: ${p.name}`);
+}
+
+$("btn-send").addEventListener("click", send);
+$("btn-done").addEventListener("click", done);
+$("btn-newflag").addEventListener("click", newFlag);
+$("btn-reset").addEventListener("click", () => { reset(); toast("Demo reset"); });
+reset();
+</script>
